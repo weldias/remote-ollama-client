@@ -1,0 +1,33 @@
+# Environment variables (contains local server address, secrets, etc.)
+.env
+.env.*
+!.env.example
+
+# Docker
+*.log
+docker-compose.override.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python (helper scripts)
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Bash script artifacts
+*.tmp
+*.bak
+
+# Logs
+logs/
+*.out

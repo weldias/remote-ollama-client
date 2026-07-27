@@ -1,0 +1,12 @@
+services:
+  ollama-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ollama-client:latest
+    container_name: ollama-client
+    environment:
+      OLLAMA_HOST: http://${OLLAMA_SERVER}:${OLLAMA_PORT}
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/bash"]
