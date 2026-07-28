@@ -1,0 +1,40 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate Dockerfile build config
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          call: check
+
+      - name: Validate docker-compose.yml
+        env:
+          OLLAMA_SERVER: ollama-server.validation
+          OLLAMA_PORT: 11434
+        run: docker compose config -q
+
+      - name: Build image locally (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          load: false
+          tags: weldias/ollama-remote-client:pr-check
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
