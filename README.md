@@ -1,89 +1,158 @@
 # Ollama Remote Client
 
-A lightweight Debian-based Docker container that acts as a CLI client for a **remote Ollama server**. Instead of running Ollama locally, this image lets you interact with an Ollama instance hosted elsewhere on your network (e.g. a homelab server) through an interactive shell.
+A lightweight Debian-based Docker image that works as a CLI client for a **remote Ollama server**. Instead of hosting models locally, this container connects to an existing Ollama instance over the network through the `OLLAMA_HOST` environment variable.
 
 ## Features
 
-- 🐧 Minimal Debian 13 base image
-- 🔌 Connects to any remote Ollama server via `OLLAMA_HOST`
-- 🐚 Drops you into an interactive Bash shell on startup
-- 🔐 Server address kept out of version control via `.env`
-- 🧩 Fully configurable through Docker Compose
+- Debian 13 base image
+- Remote Ollama endpoint support via `OLLAMA_HOST`
+- Ready to use with Docker Compose
+- Interactive Bash shell workflow
+- Local environment configuration with `.env`
+- Suitable for homelab and remote inference setups
 
-## Project Structure
+## Image on Docker Hub
 
+The prebuilt image is available on Docker Hub:
+
+- [`weldias/ollama-remote-client`](https://hub.docker.com/r/weldias/ollama-remote-client)
+
+You can either **pull and run the published image** or **build it locally from this repository**.
+
+## Quick Start with Docker Hub
+
+### 1. Pull the image
+
+```bash
+docker pull weldias/ollama-remote-client:latest
 ```
-.
-├── Dockerfile
-├── docker-compose.yml
-├── .env                # local only, gitignored
-├── .env.example        # template for required variables
-├── scripts/            # helper scripts copied into the image
-└── README.md
+
+### 2. Run it with a remote Ollama server
+
+```bash
+docker run -it --rm   -e OLLAMA_HOST=http://your-ollama-server:11434   weldias/ollama-remote-client:latest
 ```
 
-## Prerequisites
+That opens a shell inside the container with `OLLAMA_HOST` already configured for the remote server.
 
-- Docker Engine
-- Docker Compose v2+
-- A running Ollama server reachable from this machine
+### 3. Test connectivity
 
-## Setup
+Once inside the container:
 
-1. Clone the repository:
+```bash
+ollama --version
+ollama list
+```
 
-   ```bash
-   git clone https://github.com/your-user/ollama-remote-client.git
-   cd ollama-remote-client
-   ```
+If the remote server is reachable, `ollama list` should return the models available on that server.
 
-2. Create your local `.env` file from the example:
+## Quick Start with Docker Compose
 
-   ```bash
-   cp .env.example .env
-   ```
+Create a `docker-compose.yml` like this:
 
-3. Edit `.env` with your Ollama server's address:
+```yaml
+services:
+  ollama-client:
+    image: weldias/ollama-remote-client:latest
+    container_name: ollama-client
+    environment:
+      OLLAMA_HOST: http://${OLLAMA_SERVER}:${OLLAMA_PORT}
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/bash"]
+```
 
-   ```env
-   OLLAMA_SERVER=
-   OLLAMA_PORT=11434
-   ```
+Create a local `.env` file:
 
-## Usage
+```env
+OLLAMA_SERVER=ollama-server.ravenloft
+OLLAMA_PORT=11434
+```
 
-Build and start the container with an interactive shell:
+Start the container:
 
 ```bash
 docker compose up -d
 docker compose exec ollama-client bash
 ```
 
-Or run it directly in the foreground:
+Or run it in the foreground:
 
 ```bash
 docker compose run --rm ollama-client
 ```
 
-Once inside the container, verify the connection to your remote server:
+## Build from Source
+
+If you prefer to build the image yourself:
 
 ```bash
-ollama list
+git clone https://github.com/your-user/ollama-remote-client.git
+cd ollama-remote-client
+docker compose build
+```
+
+Example compose file for local builds:
+
+```yaml
+services:
+  ollama-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ollama-client:latest
+    container_name: ollama-client
+    environment:
+      OLLAMA_HOST: http://${OLLAMA_SERVER}:${OLLAMA_PORT}
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/bash"]
 ```
 
 ## Configuration
 
-| Variable        | Description                          | Example                     |
-|-----------------|---------------------------------------|------------------------------|
-| `OLLAMA_SERVER` | Hostname or IP of the remote server   | `ollama-server.ravenloft`   |
-| `OLLAMA_PORT`   | Port the remote Ollama API listens on | `11434`                      |
+| Variable | Description | Example |
+|---|---|---|
+| `OLLAMA_HOST` | Full URL of the remote Ollama server | `http://ollama-server.ravenloft:11434` |
+| `OLLAMA_SERVER` | Hostname or IP used by Docker Compose | `ollama-server.ravenloft` |
+| `OLLAMA_PORT` | Port used by Docker Compose | `11434` |
 
-These variables are combined into `OLLAMA_HOST` and injected into the container at runtime via Docker Compose, overriding the default defined in the `Dockerfile`.
+When using Docker Compose, `OLLAMA_SERVER` and `OLLAMA_PORT` are combined into `OLLAMA_HOST` at runtime.
 
-## Security Notes
+## Project Structure
 
-- The `.env` file is excluded from version control via `.gitignore` — never commit real server addresses or credentials.
-- Only `.env.example` (with placeholder values) should be tracked in Git.
+```text
+.
+├── Dockerfile
+├── docker-compose.yml
+├── .env.example
+├── scripts/
+└── README.md
+```
+
+## Git Notes
+
+Recommended `.gitignore` entries:
+
+```gitignore
+.env
+.env.*
+!.env.example
+```
+
+This keeps local server addresses and other machine-specific values out of version control while preserving a tracked example file.
+
+## Common Commands
+
+Inside the container, useful commands include:
+
+```bash
+ollama --version
+ollama list
+ollama show llama3
+```
+
+Replace `llama3` with a model that exists on your remote Ollama server.
 
 ## License
 
