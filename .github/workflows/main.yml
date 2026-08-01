@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
 
 env:
-  IMAGE_NAME: weldias/ollama-remote-client   # ajuste para seu repo no Docker Hub
+  IMAGE_NAME: weldias/ollama-remote-client
 
 jobs:
   build:
