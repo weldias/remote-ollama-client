@@ -65,7 +65,7 @@ services:
 Create a local `.env` file:
 
 ```env
-OLLAMA_SERVER=ollama-server.ravenloft
+OLLAMA_SERVER=ADDRESS-OF-YOUR-OLLAMA-SERVER
 OLLAMA_PORT=11434
 ```
 
