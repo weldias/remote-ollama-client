@@ -1,5 +1,5 @@
 #!/bin/bash
 
-echo "Atualizando modelos previamente baixados"
+echo "Updating previously downloaded models"
 ollama list | awk 'NR>1 {print $1}' | xargs -I {} ollama pull {}
-echo "Modelos atualizados"
+echo "Models updated"
