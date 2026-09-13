@@ -10,6 +10,7 @@ A lightweight Debian-based Docker image that works as a CLI client for a **remot
 - Interactive Bash shell workflow
 - Local environment configuration with `.env`
 - Suitable for homelab and remote inference setups
+- Lightweight and secure design
 
 ## Image on Docker Hub
 
@@ -30,7 +31,9 @@ docker pull weldias/ollama-remote-client:latest
 ### 2. Run it with a remote Ollama server
 
 ```bash
-docker run -it --rm   -e OLLAMA_HOST=http://your-ollama-server:11434   weldias/ollama-remote-client:latest
+docker run -it --rm \
+  -e OLLAMA_HOST=http://your-ollama-server:11434 \
+  weldias/ollama-remote-client:latest
 ```
 
 That opens a shell inside the container with `OLLAMA_HOST` already configured for the remote server.
@@ -127,6 +130,7 @@ When using Docker Compose, `OLLAMA_SERVER` and `OLLAMA_PORT` are combined into `
 ├── docker-compose.yml
 ├── .env.example
 ├── scripts/
+│   └── update-downloaded-models.sh
 └── README.md
 ```
 
@@ -153,6 +157,55 @@ ollama show llama3
 ```
 
 Replace `llama3` with a model that exists on your remote Ollama server.
+
+## Troubleshooting
+
+### Connection Issues
+
+If you're having trouble connecting to your remote Ollama server:
+
+1. Verify the server is running and accessible:
+   ```bash
+   ping $OLLAMA_SERVER
+   telnet $OLLAMA_SERVER $OLLAMA_PORT
+   ```
+
+2. Check that the Ollama server allows remote connections:
+   ```bash
+   # On the Ollama server, ensure it's listening on all interfaces
+   ollama serve --host 0.0.0.0:11434
+   ```
+
+3. Verify environment variable is set correctly:
+   ```bash
+   echo $OLLAMA_HOST
+   ```
+
+### Model Availability
+
+If `ollama list` returns an empty list:
+
+1. Ensure the remote server has models available
+2. Check that you have the correct permissions
+3. Verify network connectivity to the server
+
+## Best Practices
+
+1. **Security**: Never commit `.env` files with sensitive information
+2. **Network**: Ensure your Ollama server allows connections from the client container
+3. **Performance**: For better performance, consider running the client and server on the same network
+4. **Updates**: Regularly update the client image to get the latest Ollama features
+
+## Example Use Cases
+
+### Homelab Setup
+Use this client to manage models from a central Ollama server in your home network.
+
+### Remote Development
+Access remote Ollama servers from your local development environment.
+
+### Multi-Environment Management
+Deploy multiple client containers to different environments while connecting to the same remote server.
 
 ## License
 
